@@ -25,7 +25,25 @@ class DatasetReader:
         styled_print("📂", f"   Looking for file: {self.filename}", "blue")
         self._read_data()
         self.preprocess_audio()
+        self.preprocess_eeg()
 
+    @staticmethod
+    def hilbert_transform(x):
+        return scipy.signal.hilbert(x, scipy.fftpack.next_fast_len(len(x)), axis=0)[:len(x)]
+
+    def preprocess_eeg(self):
+        styled_print("📂", " Preprocessing EEG...", "blue")
+        eeg = scipy.signal.detrend(self.eeg, axis=0)
+       
+        sos = scipy.signal.iirfilter(4, [70 / (config.EEG_SR / 2), 170 / (config.EEG_SR / 2)], btype='bandpass', output='sos')
+        eeg = scipy.signal.sosfiltfilt(sos, eeg, axis=0)
+
+        for freq in [100, 150]:
+            sos = scipy.signal.iirfilter(4, [(freq - 2) / (config.EEG_SR / 2), (freq + 2) / (config.EEG_SR / 2)],
+                                         btype='bandstop', output='sos')
+            eeg = scipy.signal.sosfiltfilt(sos, eeg, axis=0)
+        eeg = np.abs(self.hilbert_transform(eeg))
+        self.eeg = eeg
     def _read_data(self):
         styled_print("📡", "Reading NWB Data...", "yellow", panel=True)
         
