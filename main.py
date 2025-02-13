@@ -35,7 +35,7 @@ fasttext_embeddings = fasttext_embedder.get_embeddings(data_loader.word_labels)
 
 
 trainer = ModelTrainer(
-    model_name='Ridge',
+    model_name='ElasticNet',
     subject_id=subjetc_id
 )
 
