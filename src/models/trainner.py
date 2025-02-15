@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 import pdb
 
@@ -26,28 +27,41 @@ class ModelTrainer:
 
     def train_model(self, model, X, y):
         self.model = model
-        print("🔧 Starting Model Training 🔧")
+        print("🔧 Starting Model Training with 5-Fold Cross Validation 🔧")
         print(f"🟢 Initial Data Shapes: X={X.shape}, y={y.shape}")
+
+        kf = KFold(n_splits=5, shuffle=True, random_state=42)
+        fold_scores = []
+
+        for fold, (train_idx, val_idx) in enumerate(kf.split(X)):
+            print(f"\n🔄 Fold {fold + 1}/5")
+            
+            X_train, X_val = X[train_idx], X[val_idx]
+            y_train, y_val = y[train_idx], y[val_idx]
+
+            #print(f"📊 Training Data Shapes: X_train={X_train.shape}, y_train={y_train.shape}")
+            #print(f"📊 Validation Data Shapes: X_val={X_val.shape}, y_val={y_val.shape}")
+
+            history = self.model.train(X_train, y_train)
+            
+
+            
+            try:
+                history_path = Path(self.model_dir, 'history.csv')
+                history.to_csv(history_path)
+                print(f"💾 Training history saved at: {history_path}")
+
+                model.save(self.model_path)
+                print(f"💾 Model saved at: {self.model_path}")
+            except:
+                print('⚠️ History saving not allowed')
+                self.model_type = 'Reg'
+            score = self.evaluate_model(X_val, y_val, fold)
+            print(f"✅ Fold {fold + 1} Score: {score}")
+            fold_scores.append(score)
         
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
-        print(f"📊 Training Data Shapes: X_train={X_train.shape}, y_train={y_train.shape}")
-        print(f"📊 Test Data Shapes: X_test={X_test.shape}, y_test={y_test.shape}")
-
-        history = self.model.train(X_train, y_train)
-        print("✅ Model training completed")
-        try:
-            history_path = Path(self.model_dir, 'history.csv')
-            history.to_csv(history_path)
-            print(f"💾 Training history saved at: {history_path}")
-           
-            model.save(self.model_path)
-            print(f"💾 Model saved at: {self.model_path}")
-        except:
-            print('History saving not allowd')
-            self.model_type='Reg'
-        self.evaluate_model(X_test, y_test)
-
-    def evaluate_model(self, X, y):
+       
+    def evaluate_model(self, X, y, fold):
         print("🔍 Evaluating Model 🔍")
         print(f"🟢 Input Data Shapes: X={X.shape}, y={y.shape}")
         if self.model_type =='Reg':
@@ -63,6 +77,6 @@ class ModelTrainer:
 
         print(f"📊 RMSE {rmse}, MSE {mse}, 'R2 {r2}")
 
-        np.save(str(Path(self.model_dir, 'metrics.npy')), np.array([mse, rmse, r2]))
+        np.save(str(Path(self.model_dir, f'Fold_{fold}_metrics.npy')), np.array([mse, rmse, r2]))
         self.metrices = [mse, rmse, r2]
         print(f"💾 Metrics values saved at: {str(Path(self.model_dir, 'metrics.npy'))}")
