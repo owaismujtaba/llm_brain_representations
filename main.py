@@ -12,8 +12,8 @@ from src.models.models import RegressionModel, ElasticNetModel
 from src.utils.visualizations import plot_r2
 import config as config
 
-plot_r2(model='ElasticNet_ChatGPT')
-plot_r2(model='ElasticNet_FastText')
+#plot_r2(model='ElasticNet_ChatGPT')
+#plot_r2(model='ElasticNet_FastText')
 
 
 
@@ -35,10 +35,10 @@ if config.TRAIN_CHATGPT_BASED:
         word_trials = data_loader.word_labels
 
         gpt_embedder = ChatGPTEmbedder()
-        gpt_embeddings = gpt_embedder.get_embeddings(data_loader.word_labels)
+        gpt_embeddings = gpt_embedder.get_embeddings(word_trials)
 
         fasttext_embedder = FastTextEmbedder()
-        fasttext_embeddings = fasttext_embedder.get_embeddings(data_loader.word_labels)
+        fasttext_embeddings = fasttext_embedder.get_embeddings(word_trials)
 
 
         trainer = ModelTrainer(
@@ -57,7 +57,7 @@ if config.TRAIN_CHATGPT_BASED:
             model_name='ElasticNet_FastText',
             subject_id=subjetc_id
         )
-        model = ElasticNetModel()
+        
         trainer.train_model(
             model=model,
             X=fasttext_embeddings, 

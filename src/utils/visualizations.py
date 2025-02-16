@@ -7,7 +7,7 @@ from pathlib import Path
 import config as config
 
 
-def plot_r2(model='ElasticNet_ChatGPT'):
+def plot_r2(model):
 
     destination_dir = Path(config.CUR_DIR, 'Results', 'Images')
     root_dir = config.TRAINED_DIR
@@ -15,6 +15,7 @@ def plot_r2(model='ElasticNet_ChatGPT'):
 
     for subject in sorted(os.listdir(root_dir)):
         subject_path = os.path.join(root_dir, subject, "Mapping", model)
+        print(subject_path)
         if os.path.exists(subject_path):
             r2_scores = []
             
@@ -41,7 +42,7 @@ def plot_r2(model='ElasticNet_ChatGPT'):
 
     plt.xlabel("Subjects", fontsize=12, fontweight="bold")
     plt.ylabel("R²", fontsize=12, fontweight="bold")
-    plt.title("R² Score Distribution Across 5 Folds", fontsize=14, fontweight="bold")
+    plt.title("R² distribution across 5 folds", fontsize=14, fontweight="bold")
 
     plt.xticks(rotation=45, fontsize=10)
     plt.yticks(fontsize=12)

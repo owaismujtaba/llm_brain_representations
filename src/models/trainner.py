@@ -74,9 +74,17 @@ class ModelTrainer:
         mse = mean_squared_error(y_flatten, predicted_flat)
         rmse = np.sqrt(mse)
         r2 = r2_score(y_flatten, predicted_flat)
+        pcc = np.corrcoef(y_flatten, predicted_flat)[0, 1]
 
-        print(f"📊 RMSE {rmse}, MSE {mse}, 'R2 {r2}")
+        print(f"📊 RMSE {rmse}, MSE {mse}, 'R2 {r2}, PCC {pcc}")
 
-        np.save(str(Path(self.model_dir, f'Fold_{fold}_metrics.npy')), np.array([mse, rmse, r2]))
+
+        #mse_per_sample = [mean_squared_error(y[i], predictions[i]) for i in range(y.shape[0])]
+        ##rmse_per_sample = [np.sqrt(mse) for mse in mse_per_sample]
+        #2_per_sample = [r2_score(y[i], predictions[i]) for i in range(y.shape[0])]
+
+        #print(r2_per_sample)
+
+        np.save(str(Path(self.model_dir, f'Fold_{fold}_metrics.npy')), np.array([mse, rmse, r2, pcc]))
         self.metrices = [mse, rmse, r2]
-        print(f"💾 Metrics values saved at: {str(Path(self.model_dir, 'metrics.npy'))}")
+        print(f"💾 Metrics values saved at: {str(Path(self.model_dir, f'Fold_{fold}_metrics.npy'))}")
