@@ -55,3 +55,24 @@ def plot_r2(model):
     filename = Path(destination_dir, f'{model}.png')
 
     plt.savefig(filename, dpi=800)
+
+
+def get_r2_scores(model):
+    root_dir = config.TRAINED_DIR
+    subject_r2_scores = {}
+
+    for subject in sorted(os.listdir(root_dir)):
+        subject_path = os.path.join(root_dir, subject, "Mapping", model)
+        if os.path.exists(subject_path):
+            r2_scores = []
+            
+            for fold_file in sorted(os.listdir(subject_path)):
+                if fold_file.endswith(".npy"):
+                    fold_path = os.path.join(subject_path, fold_file)
+                    values = np.load(fold_path) 
+                    r2_scores.append(values[3])  
+            
+            if r2_scores:
+                subject_r2_scores[subject] = r2_scores
+    
+    return subject_r2_scores

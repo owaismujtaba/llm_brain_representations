@@ -1,23 +1,26 @@
+import torch
+import torchaudio
+import librosa
 import numpy as np
-import gensim.downloader as api
-from gensim.models.word2vec import Word2Vec
+import soundfile as sf
+from transformers import Wav2Vec2Processor, Wav2Vec2Model
 
 class Wav2Vec2Model:
     def __init__(self, ):
-        self.corpus = api.load('text8')
-        self.model = Word2Vec(
-            self.corpus, vector_size=768, 
-            window=5, min_count=5
-        )
+        self.processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base-960h")
+        self.model = Wav2Vec2Model.from_pretrained("facebook/wav2vec2-base-960h")
 
-    def get_embeddings(self, words):
+
+    def get_embeddings(self, audios):
         print('Extracting embeddings from Wav2Vec Model')
-        word_embeddings = []
-        for word in words:
-            embedding = self.model.wv[word]
-            word_embeddings.append(embedding)
+        audio_embeddings = []
+        for audio in audios:
+            input_values = self.processor(audio, return_tensors="pt", sampling_rate=16000).input_values
+            with torch.no_grad():
+                outputs = self.model(input_values)
 
-        word_embeddings = np.array(word_embeddings)
+            latent_space = outputs.last_hidden_state
+            word_embeddings = np.array(word_embeddings)
         return word_embeddings
 
    

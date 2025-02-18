@@ -32,7 +32,8 @@ class ModelTrainer:
 
         kf = KFold(n_splits=5, shuffle=True, random_state=42)
         fold_scores = []
-
+        # 99 for trials and only one for evaluation
+        # PCA on the EEg Leave one out strategy
         for fold, (train_idx, val_idx) in enumerate(kf.split(X)):
             print(f"\n🔄 Fold {fold + 1}/5")
             
@@ -60,7 +61,14 @@ class ModelTrainer:
             print(f"✅ Fold {fold + 1} Score: {score}")
             fold_scores.append(score)
         
-       
+        fold_scores = np.array(fold_scores)  # Convert list to NumPy array for easy averaging
+        avg_mse, avg_rmse, avg_r2, avg_pcc = np.mean(fold_scores, axis=0)
+
+        print("\n📊 Final Cross-Validation Results:")
+        print(f"🔹 Average RMSE: {avg_rmse:.4f}")
+        print(f"🔹 Average MSE: {avg_mse:.4f}")
+        print(f"🔹 Average R² Score: {avg_r2:.4f}")
+        print(f"🔹 Average PCC: {avg_pcc:.4f}")
     def evaluate_model(self, X, y, fold):
         print("🔍 Evaluating Model 🔍")
         print(f"🟢 Input Data Shapes: X={X.shape}, y={y.shape}")
@@ -86,5 +94,6 @@ class ModelTrainer:
         #print(r2_per_sample)
 
         np.save(str(Path(self.model_dir, f'Fold_{fold}_metrics.npy')), np.array([mse, rmse, r2, pcc]))
-        self.metrices = [mse, rmse, r2]
+        self.metrices = [mse, rmse, r2, pcc]
         print(f"💾 Metrics values saved at: {str(Path(self.model_dir, f'Fold_{fold}_metrics.npy'))}")
+        return self.metrices

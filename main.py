@@ -6,7 +6,7 @@ from src.models.chatgpt2 import ChatGPTEmbedder
 from src.models.fasttext import FastTextEmbedder
 
 from src.models.trainner import ModelTrainer
-from src.models.models import RegressionModel, ElasticNetModel
+from src.models.models import  ElasticNetModel, NeuralNetwork
 
 
 from src.utils.visualizations import plot_r2
@@ -45,7 +45,10 @@ if config.TRAIN_CHATGPT_BASED:
             model_name='ElasticNet_ChatGPT',
             subject_id=subjetc_id
         )
-
+      
+        input_shape = (gpt_embeddings.shape[1],)
+        output_shape = (eeg_trials.shape[1])
+        #model = NeuralNetwork(input_shape=input_shape, output_shape=output_shape)
         model = ElasticNetModel()
         trainer.train_model(
             model=model,
@@ -53,6 +56,10 @@ if config.TRAIN_CHATGPT_BASED:
             y=eeg_trials
         )
 
+        input_shape = (fasttext_embeddings.shape[1],)
+        output_shape = (eeg_trials.shape[1])
+        #model = NeuralNetwork(input_shape=input_shape, output_shape=output_shape)
+        model = ElasticNetModel()
         trainer = ModelTrainer(
             model_name='ElasticNet_FastText',
             subject_id=subjetc_id
@@ -64,6 +71,7 @@ if config.TRAIN_CHATGPT_BASED:
             y=eeg_trials
         )
 
+        
 
 
 

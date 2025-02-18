@@ -26,6 +26,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 Trained
+Trained1
 Results
 
 # PyInstaller
