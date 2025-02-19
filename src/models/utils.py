@@ -6,9 +6,7 @@ from sklearn.decomposition import PCA
 
 from sklearn.decomposition import PCA
 import numpy as np
-
-from sklearn.decomposition import PCA
-import numpy as np
+import pdb
 
 class EEGPCAProcessor:
     def __init__(self, variance_retained=0.90):
@@ -26,7 +24,6 @@ class EEGPCAProcessor:
             eeg_pca (numpy.ndarray): Transformed EEG trials in flattened form of shape (N, new_C)
         """
         N, T, C = eeg_trials.shape
-        
         # Flatten the entire dataset (N samples, T * C)
         eeg_flat = eeg_trials.reshape(N, -1)  # Shape: (N, T * C)
         

@@ -2,26 +2,40 @@ import torch
 import torchaudio
 import librosa
 import numpy as np
+import torchaudio
+import pdb
 import soundfile as sf
-from transformers import Wav2Vec2Processor, Wav2Vec2Model
+import config as config
 
 class Wav2Vec2Model:
     def __init__(self, ):
-        self.processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base-960h")
-        self.model = Wav2Vec2Model.from_pretrained("facebook/wav2vec2-base-960h")
+        print('Word2Vec')
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+        self.bundle = torchaudio.pipelines.WAV2VEC2_XLSR_300M
+        # bundle = torchaudio.pipelines.WAV2VEC2_BASE
+        # Build the model and load pretrained weight.
+        self.model = self.bundle.get_model().to(device)
+        self.layer = config.LAYER
 
     def get_embeddings(self, audios):
         print('Extracting embeddings from Wav2Vec Model')
         audio_embeddings = []
         for audio in audios:
-            input_values = self.processor(audio, return_tensors="pt", sampling_rate=16000).input_values
-            with torch.no_grad():
-                outputs = self.model(input_values)
+            with torch.inference_mode():
+                audio = torch.tensor(audio)
+                sf.write(f'a.wav',audio, samplerate=16000)
+                waveform, sample_rate = torchaudio.load(f'a.wav')
 
-            latent_space = outputs.last_hidden_state
-            word_embeddings = np.array(word_embeddings)
-        return word_embeddings
+                features, _ = self.model.extract_features(waveform)  # , num_layers=1         
+                audio_embedding = np.concatenate([layer_embed.numpy(force=True) for layer_embed in features])
+                audio_embeddings.append(audio_embedding[config.LAYER])
+            
+        audio_embeddings = np.array(audio_embeddings)
+        print(audio_embeddings.shape)
+
+        return audio_embeddings
+        
 
    
     

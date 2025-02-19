@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -7,12 +8,6 @@ from pathlib import Path
 import config as config
 import pdb
 
-import os
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-from pathlib import Path
-import config
 
 
 def plot_r2(model):
@@ -76,11 +71,11 @@ def plot_r2(model):
 
     # Save plot
     os.makedirs(destination_dir, exist_ok=True)
-    filename = Path(destination_dir, f'{model}.pdf')
-    plt.savefig(filename, dpi=800, format='pdf', bbox_inches="tight")
+    #filename = Path(destination_dir, f'{model}.pdf')
+    #plt.savefig(filename, dpi=800, format='pdf', bbox_inches="tight")
 
 
-    return subject_means  # Return the means if needed
+    return plt  # Return the means if needed
 
 
 
@@ -117,11 +112,9 @@ def plot_r2_vs_trials_all_subjects_in_bins(model):
         # Create bins from 0 to 1 with a 0.1 step
         bins = np.arange(0, 1.1, 0.05)
 
-        # Count occurrences of each R² score in the bins
         binned_data = pd.cut(all_r2_scores, bins=bins)
         trial_counts = pd.value_counts(binned_data, sort=False)
 
-        # Get color from cycle
         line_color = color_cycle[color_index % len(color_cycle)]
         color_index += 1  # Increment color index for next subject
 
@@ -129,7 +122,6 @@ def plot_r2_vs_trials_all_subjects_in_bins(model):
         plt.plot(trial_counts.index.astype(str), trial_counts.values, marker='o', linestyle='--', 
                  label=f"Subject {subject}", color=line_color)
 
-        # Annotate each point with the number of trials (excluding zeros)
         for i, (bin_label, count) in enumerate(zip(trial_counts.index.astype(str), trial_counts.values)):
             if count > 0:  # Only annotate non-zero values
                 # Determine an available y-position to avoid overlap
@@ -140,22 +132,17 @@ def plot_r2_vs_trials_all_subjects_in_bins(model):
                 # Mark this position as occupied
                 occupied_positions[(i, y_position)] = True
 
-                #plt.text(i, y_position, str(count), fontsize=12, ha='center', va='bottom', 
-                        # color=line_color, fontweight='bold')
+                plt.text(i, y_position, str(count), fontsize=12, ha='center', va='bottom', 
+                         color=line_color, fontweight='bold')
 
-    # Plot labels and title
     plt.xlabel("R²", fontsize=18, fontweight="bold", color="#003366")
     plt.ylabel("# Trials", fontsize=18, fontweight="bold", color="#003366")
 
     plt.xticks(rotation=45, fontsize=18,fontweight="bold",color="black")  
     plt.yticks(fontsize=18,fontweight="bold",  color="black")  
-
-    # Add legend to distinguish subjects
     plt.legend(title="Subjects", fontsize=12, title_fontsize=14)
-
     plt.tight_layout()
 
-    # Save plot
     os.makedirs(destination_dir, exist_ok=True)
     filename = Path(destination_dir, f'{model}_r2_vs_#trials.pdf')
     plt.savefig(filename, dpi=800, format='pdf', bbox_inches="tight")

@@ -17,6 +17,7 @@ class ElasticNetModel:
         self.model = ElasticNet(alpha=1.0, l1_ratio=0.5)
     
     def train(self, X, y):
+        print(X.shape)
         X = X.reshape(X.shape[0], -1)
         y = y.reshape(y.shape[0], -1)
         self.model.fit(X, y)
