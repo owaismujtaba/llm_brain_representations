@@ -5,6 +5,8 @@ from pathlib import Path
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import LeaveOneGroupOut
+
 import pdb
 
 import config as config
@@ -25,6 +27,47 @@ class ModelTrainer:
         
         print("✅ ModelTrainer Initialization Complete ✅")
 
+    def train_model(self, model, X, y, trial_labels):
+        self.model = model
+        print("🔧 Starting Model Training with Leave-One-Trial-Out Cross Validation 🔧")
+        print(f"🟢 Initial Data Shapes: X={X.shape}, y={y.shape}")
+
+        logo = LeaveOneGroupOut()  # Leave-One-Trial-Out cross-validation
+        fold_scores = []
+
+        for fold, (train_idx, val_idx) in enumerate(logo.split(X, y, groups=trial_labels)):
+            print(f"\n🔄 Trial {fold + 1}/{len(np.unique(trial_labels))} left out")
+            
+            X_train, X_val = X[train_idx], X[val_idx]
+            y_train, y_val = y[train_idx], y[val_idx]
+
+            history = self.model.train(X_train, y_train)
+            
+            try:
+                history_path = Path(self.model_dir, 'history.csv')
+                history.to_csv(history_path)
+                print(f"💾 Training history saved at: {history_path}")
+
+                model.save(self.model_path)
+                print(f"💾 Model saved at: {self.model_path}")
+            except:
+                print('⚠️ History saving not allowed')
+                self.model_type = 'Reg'
+            
+            score = self.evaluate_model(X_val, y_val, fold)
+            print(f"✅ Trial {fold + 1} Score: {score}")
+            fold_scores.append(score)
+
+        fold_scores = np.array(fold_scores)
+        avg_mse, avg_rmse, avg_r2, avg_pcc = np.mean(fold_scores, axis=0)
+
+        print("\n📊 Final Cross-Validation Results:")
+        print(f"🔹 Average RMSE: {avg_rmse:.4f}")
+        print(f"🔹 Average MSE: {avg_mse:.4f}")
+        print(f"🔹 Average R² Score: {avg_r2:.4f}")
+        print(f"🔹 Average PCC: {avg_pcc:.4f}")
+
+    '''
     def train_model(self, model, X, y):
         self.model = model
         print("🔧 Starting Model Training with 5-Fold Cross Validation 🔧")
@@ -69,6 +112,7 @@ class ModelTrainer:
         print(f"🔹 Average MSE: {avg_mse:.4f}")
         print(f"🔹 Average R² Score: {avg_r2:.4f}")
         print(f"🔹 Average PCC: {avg_pcc:.4f}")
+    '''
     def evaluate_model(self, X, y, fold):
         print("🔍 Evaluating Model 🔍")
         print(f"🟢 Input Data Shapes: X={X.shape}, y={y.shape}")

@@ -7,7 +7,7 @@ from src.models.fasttext import FastTextEmbedder
 
 from src.models.trainner import ModelTrainer
 from src.models.models import  ElasticNetModel, NeuralNetwork
-
+from src.models.utils import EEGPCAProcessor
 
 from src.utils.visualizations import plot_r2
 import config as config
@@ -33,7 +33,11 @@ if config.TRAIN_CHATGPT_BASED:
         eeg_trials = np.mean(eeg_trials, axis=1)
         audio_trials = data_loader.audio_trials
         word_trials = data_loader.word_labels
-
+    
+        eeg_pca_processor = EEGPCAProcessor()
+        #eeg_pca = eeg_pca_processor.fit_transform(eeg_trials=eeg_trials)
+        #eeg_trials = eeg_pca
+        
         gpt_embedder = ChatGPTEmbedder()
         gpt_embeddings = gpt_embedder.get_embeddings(word_trials)
 
@@ -53,7 +57,8 @@ if config.TRAIN_CHATGPT_BASED:
         trainer.train_model(
             model=model,
             X=gpt_embeddings, 
-            y=eeg_trials
+            y=eeg_trials,
+            trial_labels=word_trials
         )
 
         input_shape = (fasttext_embeddings.shape[1],)
@@ -68,9 +73,10 @@ if config.TRAIN_CHATGPT_BASED:
         trainer.train_model(
             model=model,
             X=fasttext_embeddings, 
-            y=eeg_trials
+            y=eeg_trials,
+            trial_labels=word_trials
         )
-
+        
         
 
 
