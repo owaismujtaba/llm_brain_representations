@@ -1,5 +1,6 @@
 import pdb
 import numpy as np
+import os
 from src.dataset.data_reader import DatasetReader
 from src.dataset.data_loader import DataLoader
 from src.models.chatgpt2 import ChatGPTEmbedder
@@ -17,9 +18,21 @@ import config as config
 from pathlib import Path
 from src.models.word2vec import Wav2Vec2Model
 
+def load_subject_embeddings(subject_folder):
+    embeddings = []
+    
+    for file in os.listdir(subject_folder):
+        if file.endswith(".npy"):
+            word = os.path.splitext(file)[0]  # Extract word from filename
+            embeddings.append(np.load(os.path.join(subject_folder, file)))
+    
+    return np.array(embeddings)
+
 if config.TRAIN_WAV2VEC_BASED:
     for subject in range(1, 11):
+
         subjetc_id = f'0{subject}'
+        '''
         reader = DatasetReader(
             sub_id=subjetc_id
         )
@@ -28,12 +41,18 @@ if config.TRAIN_WAV2VEC_BASED:
             audio=reader.audio,
             stimulus=reader.stimulus
         )
-
+        
         eeg_trials = data_loader.eeg_trials
         eeg_trials = np.mean(eeg_trials, axis=1)
         audio_trials = data_loader.audio_trials
         word_trials = data_loader.word_labels
-
+        '''
+        filepath = r'C:\DeepRESTORE\llm_brain_representations\data\embeddings\embeddings\wav2vec'
+        for file in os.listdir(filepath):
+            subject_id = file
+            folder = Path(filepath, )
+            audio_embeddings = 
+        pdb.set_trace()
         wav2vec_embedder = Wav2Vec2Model()
         wav2vec_embeddings = wav2vec_embedder.get_embeddings(audio_trials)
 
